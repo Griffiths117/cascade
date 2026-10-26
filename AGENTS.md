@@ -26,6 +26,23 @@ Single target: `cmake --build --preset dev --target smoke_test` (also `header_ch
 CI (`.github/workflows/ci.yml`) builds gcc/clang x Debug/Release, a sanitizer job,
 and a `clang-format --dry-run --Werror` job over `include src tests`.
 
+## Commits (agents: commit as you go)
+
+- Commit each logical, self-contained change as soon as it is verified (tests pass
+  and formatting is clean), rather than accumulating a large working tree. Small,
+  frequent commits are preferred over one big commit at the end of a session.
+- Never leave a session with uncommitted changes unless the user explicitly asks.
+  If work is incomplete, commit a clearly-marked WIP commit or stash it with a
+  descriptive message.
+- Before committing, run the relevant tests (`ctest --preset dev`) and formatting
+  (`clang-format --dry-run --Werror` over touched `*.hpp`/`*.cpp`). Do not commit
+  code that fails these.
+- Stage only files relevant to the change. Never commit build artifacts, vendor
+  data (`fixtures/vendor/`), or anything under `local/`.
+- Write clear, imperative commit messages that state the "why"; reference an ADR
+  or issue where applicable. Do not rewrite published history (no force-push to
+  `master`) without explicit permission.
+
 ## Requirements
 
 C++20 compiler, CMake >= 3.24, Ninja, Eigen >= 3.4 (`find_package(Eigen3 3.4 REQUIRED NO_MODULE)`).
