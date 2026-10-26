@@ -1,0 +1,33 @@
+# Build output
+build/
+build-*/
+cmake-build-*/
+compile_commands.json
+CMakeUserPresets.json
+.cache/
+ccache/
+
+# Test and coverage artefacts
+Testing/
+*.gcda
+*.gcno
+*.profraw
+*.profdata
+coverage/
+
+# Vendor data — never committed, see fixtures/README.md
+fixtures/vendor/
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# Python virtualenv for the reference implementation and tooling
+.venv/
+__pycache__/
+*.pyc
+
+local/

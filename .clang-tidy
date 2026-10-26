@@ -1,0 +1,33 @@
+---
+# Deliberately narrow: correctness and portability checks, not style opinions
+# (that is clang-format's job). Numeric code has its own hazards, so the
+# float/arithmetic checks are enabled even though they are noisy.
+Checks: >
+  -*,
+  bugprone-*,
+  clang-analyzer-*,
+  cppcoreguidelines-avoid-c-arrays,
+  cppcoreguidelines-avoid-magic-numbers,
+  cppcoreguidelines-narrowing-conversions,
+  modernize-use-nullptr,
+  modernize-use-override,
+  performance-*,
+  readability-braces-around-statements,
+  readability-const-return-type,
+  readability-container-size-empty,
+  readability-misleading-indentation,
+  readability-non-const-parameter,
+  readability-redundant-*
+HeaderFilterRegex: 'include/cascade/.*'
+WarningsAsErrors: 'bugprone-use-after-move,clang-analyzer-*,performance-*'
+CheckOptions:
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: lower_case
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: '_'
+  - key: cppcoreguidelines-avoid-magic-numbers.IgnoreAllFloatingPointValues
+    value: 'true'
