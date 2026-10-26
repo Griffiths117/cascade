@@ -1,14 +1,28 @@
-# Tests are deliberately dependency-free for now: plain executables with a
-# return code, registered with CTest. A framework (Catch2 or GoogleTest) can be
-# brought in when there is more than a smoke test to run, and the choice is
-# recorded as an ADR rather than made by accident.
+# Tests. Framework: Catch2 v3 (see ADR 0004), fetched at configure time.
+include(FetchContent)
 
+FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG v3.5.4
+    GIT_SHALLOW TRUE)
+FetchContent_MakeAvailable(Catch2)
+
+# --- dependency-free smoke test (kept for the scaffold) ---
 add_executable(smoke_test smoke_test.cpp)
 target_link_libraries(smoke_test PRIVATE cascade::cascade)
 add_test(NAME smoke COMMAND smoke_test)
 
+# --- Catch2-based unit tests ---
+file(GLOB_RECURSE CASCADE_UNIT_SOURCES CONFIGURE_DEPENDS
+     ${CMAKE_CURRENT_SOURCE_DIR}/unit/*.cpp)
+if(CASCADE_UNIT_SOURCES)
+    add_executable(cascade_tests ${CASCADE_UNIT_SOURCES})
+    target_link_libraries(cascade_tests PRIVATE cascade::cascade Catch2::Catch2WithMain)
+    add_test(NAME cascade_tests COMMAND cascade_tests)
+endif()
+
 # Every public header must compile on its own, with only its own includes.
-# Each of these translation units includes exactly one header.
 set(CASCADE_PUBLIC_HEADERS
     scalar matrix standard calibration uncertainty measurement version)
 

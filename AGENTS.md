@@ -66,8 +66,8 @@ C++20 compiler, CMake >= 3.24, Ninja, Eigen >= 3.4 (`find_package(Eigen3 3.4 REQ
   dimension everywhere, never a loop around the model.
 - Error handling uses exceptions (`cascade::Error` base planned); no error codes in
   arithmetic.
-- Tests are dependency-free plain executables with return codes; no test framework
-  is in use yet - adding one requires an ADR.
+- Tests: Catch2 v3 wired via FetchContent (ADR 0004); `cascade_tests` aggregates
+  `tests/unit/*.cpp`. Legacy `smoke_test` retained.
 
 ## Gotchas
 
@@ -75,6 +75,7 @@ C++20 compiler, CMake >= 3.24, Ninja, Eigen >= 3.4 (`find_package(Eigen3 3.4 REQ
 - `docs/` is empty in the repo; the substantive docs live under `local/docs/`.
 - `reference/` (Python oracle, ADR 0003) is not committed; parity tests that need
   it are skipped with an explanatory message.
+- Test framework: Catch2 v3 integrated; unit tests under `tests/unit/`.
 - `clang-format` (checked-in `.clang-format`, 100-col limit) is enforced in CI;
   `clang-tidy` config (`.clang-tidy`) is checked in for local use.
 - CMake presets set `CASCADE_WARNINGS_AS_ERRORS=ON` in `dev`; CI also passes it.

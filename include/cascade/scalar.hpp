@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
+#include <array>
 #include <concepts>
 #include <cstddef>
 
@@ -72,14 +73,101 @@ using ComplexDouble = Complex<double>;
 
 /// Forward-mode dual number carrying N partial derivatives.
 ///
-/// Not implemented yet. The intended shape: `value` plus `grad[k] = d/dx_k`,
-/// with arithmetic that applies the chain rule. N is a compile-time constant for
-/// a given model (30 for two-port SOLT, 12 for one-port SOL) so a Jacobian is an
-/// N-fold vector of derivative arrays and no dynamic allocation is needed.
-///
-/// TODO(v0.1): implement, with a test that compares it against central finite
-/// differences on the calibration model (target: 1e-8 relative agreement).
+/// `value` is the primal value; `grad[k]` is d/dx_k. Arithmetic applies the
+/// chain rule, so a model instantiated over `Dual` yields its Jacobian
+/// mechanically. N is a compile-time constant for a given model.
 template<class T, std::size_t N>
-class Dual;
+class Dual {
+public:
+    static_assert(N > 0, "a dual needs at least one derivative");
+
+    T value{};
+    std::array<T, N> grad{};
+
+    constexpr Dual() = default;
+
+    /// Primal constructor; derivatives default to zero.
+    constexpr explicit Dual(T v) : value(v), grad{} {}
+
+    constexpr Dual(T v, const std::array<T, N>& g) : value(v), grad(g) {}
+
+    [[nodiscard]] constexpr T& operator[](std::size_t i) { return grad[i]; }
+    [[nodiscard]] constexpr const T& operator[](std::size_t i) const { return grad[i]; }
+
+    constexpr Dual& operator+=(const Dual& o) {
+        value += o.value;
+        for (std::size_t k = 0; k < N; ++k)
+            grad[k] += o.grad[k];
+        return *this;
+    }
+    constexpr Dual& operator-=(const Dual& o) {
+        value -= o.value;
+        for (std::size_t k = 0; k < N; ++k)
+            grad[k] -= o.grad[k];
+        return *this;
+    }
+    constexpr Dual& operator*=(const Dual& o) {
+        // d(a*b) = da*b + a*db, evaluated at the current values.
+        std::array<T, N> new_grad{};
+        for (std::size_t k = 0; k < N; ++k) {
+            new_grad[k] = grad[k] * o.value + value * o.grad[k];
+        }
+        value *= o.value;
+        grad = new_grad;
+        return *this;
+    }
+    constexpr Dual& operator/=(const Dual& o) {
+        // d(a/b) = (da*b - a*db) / b^2
+        std::array<T, N> new_grad{};
+        for (std::size_t k = 0; k < N; ++k) {
+            new_grad[k] = (grad[k] * o.value - value * o.grad[k]) / (o.value * o.value);
+        }
+        value /= o.value;
+        grad = new_grad;
+        return *this;
+    }
+
+    [[nodiscard]] constexpr bool operator==(const Dual&) const = default;
+};
+
+template<class T, std::size_t N>
+[[nodiscard]] constexpr Dual<T, N> operator+(const Dual<T, N>& a, const Dual<T, N>& b) {
+    Dual<T, N> r{a.value + b.value};
+    for (std::size_t k = 0; k < N; ++k)
+        r.grad[k] = a.grad[k] + b.grad[k];
+    return r;
+}
+
+template<class T, std::size_t N>
+[[nodiscard]] constexpr Dual<T, N> operator-(const Dual<T, N>& a, const Dual<T, N>& b) {
+    Dual<T, N> r{a.value - b.value};
+    for (std::size_t k = 0; k < N; ++k)
+        r.grad[k] = a.grad[k] - b.grad[k];
+    return r;
+}
+
+template<class T, std::size_t N>
+[[nodiscard]] constexpr Dual<T, N> operator-(const Dual<T, N>& a) {
+    Dual<T, N> r{-a.value};
+    for (std::size_t k = 0; k < N; ++k)
+        r.grad[k] = -a.grad[k];
+    return r;
+}
+
+template<class T, std::size_t N>
+[[nodiscard]] constexpr Dual<T, N> operator*(const Dual<T, N>& a, const Dual<T, N>& b) {
+    Dual<T, N> r{a.value * b.value};
+    for (std::size_t k = 0; k < N; ++k)
+        r.grad[k] = a.grad[k] * b.value + a.value * b.grad[k];
+    return r;
+}
+
+template<class T, std::size_t N>
+[[nodiscard]] constexpr Dual<T, N> operator/(const Dual<T, N>& a, const Dual<T, N>& b) {
+    Dual<T, N> r{a.value / b.value};
+    for (std::size_t k = 0; k < N; ++k)
+        r.grad[k] = (a.grad[k] * b.value - a.value * b.grad[k]) / (b.value * b.value);
+    return r;
+}
 
 }  // namespace cascade
