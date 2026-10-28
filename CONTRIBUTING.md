@@ -30,7 +30,8 @@ cmake --preset sanitize && cmake --build --preset sanitize && ctest --preset san
 
 Formatting is `clang-format` with the checked-in `.clang-format`; static analysis is
 `clang-tidy` with the checked-in `.clang-tidy`. Both are advisory locally and
-enforced in CI.
+enforced in CI. The full set of writing conventions — naming, header layout,
+comment style, test structure — is in `docs/style-guide.md`.
 
 ## Adding a calibration type
 
