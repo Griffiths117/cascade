@@ -36,6 +36,7 @@ find_package(Eigen3 3.4 REQUIRED NO_MODULE)
 # ---------------------------------------------------------------------------
 add_library(cascade
     src/version.cpp
+    src/io.cpp
 )
 add_library(cascade::cascade ALIAS cascade)
 

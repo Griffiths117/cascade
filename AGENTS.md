@@ -50,7 +50,8 @@ C++20 compiler, CMake >= 3.24, Ninja, Eigen >= 3.4 (`find_package(Eigen3 3.4 REQ
 ## Layout
 
 - `include/cascade/` - public headers (interface only, no implementation)
-- `src/` - implementation (only `version.cpp` today)
+- `include/cascade/io/` - format detection, dataset, readers/writers (sdatb, Touchstone stub)
+- `src/` - implementation (`version.cpp`, `io.cpp`)
 - `tests/` - plain executables plus generated standalone-header compile checks
 - `fixtures/` - test data; `fixtures/vendor/` is gitignored (never commit vendor data)
 - `docs/` - **empty in the committed tree**
